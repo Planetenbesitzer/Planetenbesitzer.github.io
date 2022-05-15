@@ -14582,7 +14582,7 @@ body[data-format='mobile'] .jp-OutputArea-child .jp-OutputArea-output {
 <h1 id="%E5%AF%B9%E7%B4%A7%E6%9D%9F%E7%BC%9A%E6%A8%A1%E5%9E%8B%E7%9A%84%E4%B8%80%E4%B8%AA%E5%B0%8F%E7%96%91%E9%97%AE">&#23545;&#32039;&#26463;&#32538;&#27169;&#22411;&#30340;&#19968;&#20010;&#23567;&#30097;&#38382;<a class="anchor-link" href="#%E5%AF%B9%E7%B4%A7%E6%9D%9F%E7%BC%9A%E6%A8%A1%E5%9E%8B%E7%9A%84%E4%B8%80%E4%B8%AA%E5%B0%8F%E7%96%91%E9%97%AE">&#182;</a></h1><hr>
 <p>在tight-binging模型中,哈密顿量写成
 $$
-H = H_{at} + \Delta U(\vec{r})
+H = H_{\mathrm{at}} + \Delta U(\vec{r})
 $$</p>
 <p>这里第一项讨论的是没有其他原子势能影响的单个原子的势能,也就是在$\vec{r} = \vec{R}$处的原子仅会在$\vec{R}$处的晶格产生势能而不会影响其他的晶格</p>
 
@@ -14649,7 +14649,7 @@ $$</p>
 
 
 <div class="jp-RenderedText jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/plain">
-<pre>&lt;matplotlib.legend.Legend at 0x233bb8d6b30&gt;</pre>
+<pre>&lt;matplotlib.legend.Legend at 0x233bb57a140&gt;</pre>
 </div>
 
 </div>
@@ -14694,6 +14694,36 @@ jp-needs-light-background
 
 </div>
 
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+<h2 id="%E8%AE%A1%E7%AE%97%E7%B4%A7%E6%9D%9F%E7%BC%9A%E6%A8%A1%E5%9E%8B:">&#35745;&#31639;&#32039;&#26463;&#32538;&#27169;&#22411;:<a class="anchor-link" href="#%E8%AE%A1%E7%AE%97%E7%B4%A7%E6%9D%9F%E7%BC%9A%E6%A8%A1%E5%9E%8B:">&#182;</a></h2><p>根据Bloch Theorem:
+$$\Psi_{\vec{k}}(\vec{r}) = \sum_{\vec{R}} e^{i\vec{k} \cdot \vec{R}} \phi(\vec{r}-\vec{R})$$
+其中
+$$\phi(\vec{r}) = \sum_{n} b_n \psi_{n}$$
+$$H\Psi_{\vec{k}}(\vec{r}) = (H_{\mathrm{at}} + \Delta U(\vec{r}))\Psi_{\vec{k}}(\vec{r}) = \mathcal{E}(\vec{k})\Psi_{\vec{k}}(\vec{r})$$
+左乘一个单原子的本征函数,注意我们做出假设:
+$$H_{\mathrm{at}} \psi_{m} = E_{m} \psi_{m}$$
+这个假设成立的前提是$\psi_{m}$在一个晶格之外的波函数为0(当然不可能, 只能是近似意义上), 因此称为紧束缚模型.
+得到左乘后的表达式:
+$$\int \psi_{m}^{*}(\mathbf{r}) H_{\mathrm{at}} \psi(\mathbf{r}) d \mathbf{r}=\int\left(H_{\mathrm{at}} \psi_{m}(\mathbf{r})\right)^{*} \psi(\mathbf{r}) d \mathbf{r}=E_{m} \int \psi_{m}^{*}(\mathbf{r}) \psi(\mathbf{r}) d \mathbf{r}$$
+已经将总哈密顿量$H$的本征函数下表$\vec{k}$省略, 我们发现:
+$$\left(\mathcal{E}(\mathbf{k})-E_{m}\right) \int \psi_{m}^{*}(\mathbf{r}) \psi(\mathbf{r}) d \mathbf{r}=\int \psi_{m}^{*}(\mathbf{r}) \Delta U(\mathbf{r}) \psi(\mathbf{r}) d \mathbf{r}$$
+根据单原子本征函数的正交性可以得到:
+$$\begin{aligned}
+\left(\mathcal{\mathcal{E}}(\mathbf{k})-E_{m}\right) b_{m}=&amp;-\left(\mathcal{E}(\mathbf{k})-E_{m}\right) \sum_{n}\left(\sum_{\mathbf{R} \neq 0} \int \psi_{m}^{*}(\mathbf{r}) \psi_{n}(\mathbf{r}-\mathbf{R}) e^{\mathbf{i} \mathbf{k} \cdot \mathbf{R}} d \mathbf{r}\right) b_{n} \\
+&amp;+\sum_{n}\left(\int\psi_{m}^{*}(\mathbf{r}) \Delta U(\mathbf{r}) \psi_{n}(\mathbf{r}) d \mathbf{r}\right) b_{n} \\
+&amp;+\sum_{n}\left(\sum_{\mathbf{R} \neq 0} \int \psi_{m}^{*}(\mathbf{r}) \Delta U(\mathbf{r}) \psi_{n}(\mathbf{r}-\mathbf{R}) e^{\mathbf{i} \mathbf{k} \cdot \mathbf{R}} d \mathbf{r}\right) b_{n} .
+\end{aligned}$$</p>
+<p>由这个等式可以解出$\mathcal{E}(\vec{k})$的值(in theory)</p>
+
+</div>
+</div>
+</div>
 </div>
 </body>
 
