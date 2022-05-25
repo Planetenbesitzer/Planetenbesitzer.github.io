@@ -16,4 +16,4 @@ Hello, welcome to my static web page. I'll update some little things here. you c
 
 [my way](./my_way/my_way.md)
 
-[partial formula](./function_of_twopara/inturn_partialDerivatives.md)
+[partial formula](./function_of_twopara/inturn_partialDerivatives.html)
