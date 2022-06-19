@@ -18,6 +18,6 @@ Hello, welcome to my static web page. I'll update some little things here. you c
 
 [partial formula](./function_of_twopara/inturn_partialDerivatives.html)
 
-[nabla operator](./differential_manifold/diffmani_nabla.html)
+[differential manifold](./differential_manifold/Contents.md)
 
 [count number of states](./equilibrium_statistics/method_for_counting_states.html): Maxwell Boltzmann distribution & Bose distribution
