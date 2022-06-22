@@ -12,9 +12,9 @@ Hello, welcome to my static web page. I'll update some little things here. you c
 
 ## Guide:
 
-[tight-binding](./question_of_tightbinding.html)
-
 [my way](./my_way/my_way.md)
+
+[tight-binding](./question_of_tightbinding.html)
 
 [partial formula](./function_of_twopara/inturn_partialDerivatives.html)
 

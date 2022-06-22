@@ -6,6 +6,6 @@
 
 ## [微分流形](./微分流形.html)
 
+​      
 
-
-## [$\nabla$ 算子](./nabla.html)
+## [nabla算子](./nabla.html)
