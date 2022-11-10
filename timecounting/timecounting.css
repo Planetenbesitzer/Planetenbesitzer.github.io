@@ -1,0 +1,82 @@
+/* */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    background: linear-gradient(#333, #000);
+    /* background-color: #333; */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    font-family: 'Open Sans', sans-serif;
+    font-size: 16px;
+    color: #eee;
+    margin: 0;
+    padding: 0;
+}
+
+.card {
+    position: relative;
+    width: 350px;
+    height: 190px;
+    background:linear-gradient(rgb(204, 149, 149), rgb(204, 197, 197));
+    transition: 0.5s;
+}
+
+.card:hover {
+    height: 450px;
+}
+
+.card #clock {
+    position: absolute;
+    border-radius: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 150px;
+    height: 150px;
+    background: rgb(251, 251, 0);
+    font-size: 25px;
+    color: rgb(63, 22, 174);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 10;
+}
+
+.card #topcube #rotateShadow 
+/* .card #clock::before */
+{
+    content: '';
+    position: absolute;
+    border-radius: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 165px;
+    height: 165px;
+    background: linear-gradient(transparent, #ff3c7b,#ff3c7b,#ff3c7b,transparent);
+    animation: animate2 6s linear infinite;
+    /* z-index: -1; */
+  }
+  
+  @keyframes animate2 {
+    0% {
+      transform: translate(-50%, -50%) rotate(0deg);
+    }
+    100% {
+      transform: translate(-50%, -50%) rotate(360deg);
+    }
+  }
+
+  /* .card #clock::after {
+    content: '';
+    position: absolute;
+    inset: 3px;
+    background: #292929;
+    z-index: -1;
+  } */
