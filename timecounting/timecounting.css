@@ -26,10 +26,14 @@ body {
     height: 190px;
     background:linear-gradient(rgb(204, 149, 149), rgb(204, 197, 197));
     transition: 0.5s;
+    border-bottom-left-radius: 30px;
+    border-top-right-radius: 30px;
 }
 
 .card:hover {
     height: 450px;
+    border-bottom-left-radius: 60px;
+    border-top-right-radius: 60px;
 }
 
 .card #clock {
