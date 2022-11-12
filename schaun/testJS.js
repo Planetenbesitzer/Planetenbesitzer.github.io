@@ -31,7 +31,8 @@ function clkBtn()
         showGate()
     }
     else {
-        x.value = "sorry, you may want to try again~"
+        x.value = ""
+        x.placeholder = "sorry, you may want to try again~"
     }
 }
 
