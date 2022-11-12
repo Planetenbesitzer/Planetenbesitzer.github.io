@@ -47,9 +47,9 @@ function mOver(obj){
     img = obj.getElementsByTagName('img')[0]
     margLeft = Number(getComputedStyle(obj).marginLeft.replace("px",""))
     margRight = Number(getComputedStyle(obj).marginRight.replace("px",""))
-    // if marginRight is too small, change to sheep1 and go to left
     if (obj.position == 0){
-        img.src = "images/sheep.gif"
+        // img.src = "images/sheep.gif"
+        img.style.transform = "rotateY(180deg)"
         obj.style.marginLeft = (Number(margLeft)+obj.boxWidth)+"px";
         obj.position += 1;
         console.log(obj.position)
@@ -57,23 +57,25 @@ function mOver(obj){
         btn.onclick = clkBtn
         btn.innerHTML = "Submit ! !"
     }
-    // if marginLeft is too small, change to sheep and go to right
     else if (obj.position == 12){
-        img.src = "images/sheep1.gif"
+        // img.src = "images/sheep1.gif"
+        img.style.transform = "rotateY(0deg)"
         obj.style.marginLeft = (Number(margLeft)-obj.boxWidth)+"px";
         obj.position -= 1;
         console.log(obj.position)
     }
     // if <1/2, change to sheep1 and go to left
     else if (Math.random() < 0.5){
-        img.src = "images/sheep1.gif"
+        // img.src = "images/sheep1.gif"
+        img.style.transform = "rotateY(0deg)"
         obj.style.marginLeft = (Number(margLeft)-obj.boxWidth)+"px";
         obj.position -= 1;
         console.log(obj.position)
         if (obj.position == 0){showGate()}
     }
     else {
-        img.src = "images/sheep.gif"
+        // img.src = "images/sheep.gif"
+        img.style.transform = "rotateY(180deg)"
         obj.style.marginLeft = (Number(margLeft)+obj.boxWidth)+"px";
         obj.position += 1;
         console.log(obj.position)
