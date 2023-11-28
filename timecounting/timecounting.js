@@ -3,7 +3,7 @@ function loadjs() {
 }
 
 function drawClock() {
-    const timefix = new Date("December 24, 2022 08:30:00");
+    const timefix = new Date("December 23, 2023 08:30:00");
     var myclk = document.getElementById("clock");
     var timeleft = document.getElementById("timeleft");
     function showTimeText(){
