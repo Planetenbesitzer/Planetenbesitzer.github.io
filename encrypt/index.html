@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>信息加密&解密</title>
+    <style>
+        body {
+            background-color: white;
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 300px;
+        }
+
+        h1 {
+            font-size: 24px;
+            color: #333;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 20px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            color: #333;
+        }
+
+        input::placeholder {
+            color: #888;
+        }
+
+        button {
+            width: 100%;
+            padding: 10px;
+            font-size: 16px;
+            color: white;
+            background-color: #007BFF;
+            border: none;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        button:active {
+            background-color: #003f7f;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>信息加密&解密</h1>
+    <input type="text" id="encryptInput" placeholder="输入要加密的内容">
+    <button id="encryptBtn">加密</button>
+    <input type="text" id="decryptInput" placeholder="输入要解密的内容">
+    <button id="decryptBtn">解密</button>
+</div>
+
+<script>
+    
+    // // 加密函数
+    // function encrypt(text) {
+    //     // 对每个字符进行 XOR 操作并进行 Base64 编码
+    //     let encryptedCode = btoa(encodeURIComponent(text).replace(/%([0-9A-F]{2})/g, function(_, p1) {
+    //         let xorValue = parseInt(p1, 16) ^ 0x52;
+    //         return String.fromCharCode(xorValue);
+    //     }));
+        
+    //     console.log("加密后的Base64:", encryptedCode);
+    //     return encryptedCode;
+    // }
+
+    // // 解密函数
+    // function decrypt(encryptedText) {
+    //     // 先 Base64 解码，再进行 XOR 还原操作
+    //     let decodedText = atob(encryptedText).split('').map(function(c) {
+    //         // 对每个字符的 Unicode 编码值执行 XOR 恢复操作
+    //         let xorValue = c.charCodeAt(0) ^ 0x52;
+    //         return '%' + ('00' + xorValue.toString(16)).slice(-2);
+    //     }).join('');
+        
+    //     console.log("XOR 还原后的编码:", decodedText);
+        
+    //     return decodeURIComponent(decodedText);
+    // }
+
+    function encrypt(text) {
+        const shifts = [0x50, 0x20, 0x10]; // 定义偏移值列表
+        let encrypted = '';
+
+        for (let i = 0; i < text.length; i++) {
+            let char = text[i];
+            // 计算当前字符的偏移值
+            let shiftValue = shifts[i % shifts.length]; // 循环使用偏移值
+            // 将字符的 Unicode 编码加上偏移值
+            let code = char.charCodeAt(0) + shiftValue;
+            encrypted += String.fromCharCode(code);
+        }
+
+        console.log("加密后的文本:", encrypted);
+        return encrypted;
+    }
+
+    function decrypt(encryptedText) {
+        const shifts = [0x50, 0x20, 0x10]; // 定义与加密相同的偏移值列表
+        let decrypted = '';
+
+        for (let i = 0; i < encryptedText.length; i++) {
+            let char = encryptedText[i];
+            // 计算当前字符的偏移值
+            let shiftValue = shifts[i % shifts.length]; // 循环使用偏移值
+            // 将字符的 Unicode 编码减去偏移值
+            let code = char.charCodeAt(0) - shiftValue;
+            decrypted += String.fromCharCode(code);
+        }
+
+        console.log("解密后的文本:", decrypted);
+        return decrypted;
+    }
+
+    document.getElementById('encryptBtn').addEventListener('click', function() {
+        const inputText = document.getElementById('encryptInput').value;
+        if (inputText) {
+            const encryptedText = encrypt(inputText);
+            document.getElementById('decryptInput').value = encryptedText;
+        }
+    });
+
+    document.getElementById('decryptBtn').addEventListener('click', function() {
+        const encryptedText = document.getElementById('decryptInput').value;
+        if (encryptedText) {
+            const decryptedText = decrypt(encryptedText);
+            document.getElementById('encryptInput').value = decryptedText;
+        }
+    });
+</script>
+
+
+</body>
+</html>
