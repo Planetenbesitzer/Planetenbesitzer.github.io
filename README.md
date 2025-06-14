@@ -1,13 +1,12 @@
-## Planetenbesitzer.github.io
+# Planetenbesitzer.github.io
 
 ---------------
 
-
-## Welcome:
+## Welcome
 
 Hello, welcome to my static web page. I'll update some little things here. you can check it anytime!
 
-## Guide:
+## Guide
 
 [my way](./my_way/my_way.md)
 
@@ -20,3 +19,7 @@ Hello, welcome to my static web page. I'll update some little things here. you c
 [count number of states](./equilibrium_statistics/method_for_counting_states.html): Maxwell Boltzmann distribution & Bose distribution
 
 [halloween!](./Halloween/halloween1.html)
+
+[encrypt your words!](./encrypt/index.html)
+
+[little game](./schaun/schaun.html)
