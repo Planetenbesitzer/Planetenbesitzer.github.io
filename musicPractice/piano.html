@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>全音域钢琴 · PolyPiano</title>
+<style>
+  :root{
+    --bg1:#0b0a1f; --bg2:#1a1033; --bg3:#2a0f3d;
+    --panel:rgba(255,255,255,.05); --panel-bd:rgba(255,255,255,.12);
+    --ink:#f3f0ff; --muted:#b3a8d4; --dim:#8a7fb0;
+    --gold:#ffd56b; --pink:#ff8bd8; --cyan:#7af0ff; --green:#8effb0; --red:#ff7a93;
+    --accent:#b98cff;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{
+    font-family:"Segoe UI","PingFang SC","Microsoft YaHei",system-ui,sans-serif;
+    color:var(--ink);
+    background:
+      radial-gradient(1200px 700px at 15% -10%, #3a1860 0%, transparent 55%),
+      radial-gradient(1000px 800px at 110% 10%, #5a1a4a 0%, transparent 50%),
+      linear-gradient(160deg,var(--bg1),var(--bg2) 50%,var(--bg3));
+    background-attachment:fixed;
+    min-height:100vh; overflow-x:hidden;
+  }
+  .blob{position:fixed;border-radius:50%;filter:blur(60px);opacity:.35;z-index:0;pointer-events:none}
+  .b1{width:380px;height:380px;background:#7c3aed;top:-80px;left:-60px;animation:drift 18s ease-in-out infinite}
+  .b2{width:300px;height:300px;background:#ec4899;bottom:-60px;right:-40px;animation:drift 22s ease-in-out infinite reverse}
+  @keyframes drift{0%,100%{transform:translate(0,0)}50%{transform:translate(40px,30px)}}
+
+  .wrap{position:relative;z-index:1;max-width:1280px;margin:0 auto;padding:24px 18px 40px}
+  header{text-align:center;margin-bottom:18px}
+  header h1{
+    font-size:30px;font-weight:800;letter-spacing:2px;
+    background:linear-gradient(90deg,var(--gold),var(--pink),var(--cyan));
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+  }
+  header p{color:var(--muted);margin-top:6px;font-size:13px;letter-spacing:1px}
+
+  /* control bar */
+  .ctrl{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;align-items:center;margin-bottom:18px}
+  .ctrl .grp{display:flex;align-items:center;gap:8px;padding:8px 14px;border-radius:30px;border:1px solid var(--panel-bd);background:var(--panel)}
+  .ctrl label{font-size:13px;color:var(--muted)}
+  .btn{
+    padding:8px 16px;border-radius:20px;font-size:13px;font-weight:700;cursor:pointer;
+    border:1px solid var(--panel-bd);background:rgba(255,255,255,.06);color:var(--ink);transition:all .18s;
+    user-select:none;
+  }
+  .btn:hover{background:rgba(185,140,255,.2);border-color:var(--accent)}
+  .btn.on{background:linear-gradient(90deg,var(--green),#5ed98c);color:#06210f;border-color:transparent;box-shadow:0 0 16px rgba(142,255,176,.4)}
+  .btn.sus-on{background:linear-gradient(90deg,var(--gold),var(--pink));color:#2a0d1f;border-color:transparent;box-shadow:0 0 18px rgba(255,213,107,.45)}
+  .vol{width:120px;accent-color:var(--accent)}
+  .octval{min-width:54px;text-align:center;font-weight:800;color:var(--gold);font-variant-numeric:tabular-nums}
+
+  .panel{
+    background:var(--panel);border:1px solid var(--panel-bd);border-radius:22px;
+    padding:20px;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+    box-shadow:0 18px 50px rgba(0,0,0,.35);
+  }
+
+  /* keyboard */
+  .keyboard{
+    position:relative;height:200px;margin:6px auto 10px;overflow-x:auto;overflow-y:hidden;
+    padding:0 6px 8px;background:rgba(0,0,0,.18);border-radius:14px;
+    scrollbar-width:thin;scrollbar-color:var(--accent) transparent;
+  }
+  .keyboard::-webkit-scrollbar{height:8px}
+  .keyboard::-webkit-scrollbar-thumb{background:var(--accent);border-radius:4px}
+  .kb-inner{position:relative;height:190px;margin:6px auto}
+  .key{
+    position:absolute;top:0;height:190px;border-radius:0 0 7px 7px;cursor:pointer;
+    user-select:none;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;
+    padding-bottom:8px;gap:4px;transition:transform .04s,box-shadow .12s,background .12s;
+  }
+  .key .kb-label{font-size:10px;opacity:.6;line-height:1}
+  .key .kb-label.map{font-size:11px;font-weight:700;opacity:.85}
+  .key.white{background:linear-gradient(180deg,#fdfbff,#d9d3ee);width:34px;border:1px solid #b9b1d6;z-index:1;color:#555}
+  .key.black{background:linear-gradient(180deg,#2a2342,#0c0a18);width:22px;height:118px;z-index:2;color:#999}
+  .key.white:hover{background:linear-gradient(180deg,#fff,#c9c0e8)}
+  .key.black:hover{background:linear-gradient(180deg,#3a3056,#15111f)}
+  .key.playing.white{background:linear-gradient(180deg,#ffe9a8,#ffd56b);box-shadow:0 0 22px rgba(255,213,107,.7)}
+  .key.playing.black{background:linear-gradient(180deg,#7c3aed,#b98cff);box-shadow:0 0 22px rgba(185,140,255,.85)}
+  .key:active{transform:translateY(2px)}
+
+  /* sustain indicator strip */
+  .pedal-strip{
+    height:6px;border-radius:3px;background:rgba(255,255,255,.08);margin:0 6px 10px;
+    transition:background .25s,box-shadow .25s;
+  }
+  .pedal-strip.on{background:linear-gradient(90deg,var(--gold),var(--pink));box-shadow:0 0 14px rgba(255,213,107,.5)}
+
+  .hint{text-align:center;color:var(--dim);font-size:12px;margin-top:6px;line-height:1.6}
+  .hint b{color:var(--cyan)}
+  .hint code{background:rgba(255,255,255,.08);padding:1px 6px;border-radius:5px;color:var(--gold);font-family:inherit}
+  footer{text-align:center;color:var(--dim);font-size:12px;margin-top:22px}
+</style>
+</head>
+<body>
+<div class="blob b1"></div><div class="blob b2"></div>
+
+<div class="wrap">
+  <header>
+    <h1>🎹 全音域钢琴</h1>
+    <p>A0 — C8 · 88 键 · 完全复音(可同时按键)· 延音 / 不延音</p>
+  </header>
+
+  <div class="ctrl">
+    <div class="grp">
+      <button class="btn sus" id="sustain-btn">延音踏板 · 关</button>
+    </div>
+    <div class="grp">
+      <label>音量</label>
+      <input type="range" class="vol" id="vol" min="0" max="100" value="85">
+    </div>
+    <div class="grp">
+      <label>键盘八度</label>
+      <button class="btn" id="oct-down">−</button>
+      <span class="octval" id="oct-val">C4</span>
+      <button class="btn" id="oct-up">＋</button>
+    </div>
+    <div class="grp">
+      <button class="btn" id="label-toggle">显示按键映射</button>
+    </div>
+  </div>
+
+  <section class="panel">
+    <div class="pedal-strip" id="pedal-strip"></div>
+    <div class="keyboard" id="kb-wrap"><div class="kb-inner" id="kb"></div></div>
+    <div class="hint">
+      鼠标 / 触摸点击琴键即可发声 · 电脑键盘字母键映射当前八度(<code>label</code> 可切换显示)<br>
+      <b>延音踏板关</b>:松开琴键即止音 · <b>延音踏板开</b>:松开后音符持续共鸣,松踏板统一止音 · 任意时刻可多键同按
+    </div>
+  </section>
+
+  <footer>Web Audio API 实时加法合成 · 单文件离线运行</footer>
+</div>
+
+<script>
+/* =========================================================
+   音频引擎:加法合成钢琴 + 每音独立增益(用于 note-off / 延音)
+   ========================================================= */
+const AC = new (window.AudioContext || window.webkitAudioContext)();
+const master = AC.createGain();
+master.gain.value = 0.85;
+const comp = AC.createDynamicsCompressor();
+comp.threshold.value=-14; comp.knee.value=24; comp.ratio.value=4; comp.attack.value=.003; comp.release.value=.12;
+master.connect(comp); comp.connect(AC.destination);
+
+function midiToFreq(m){return 440*Math.pow(2,(m-69)/12);}
+const NOTE_NAMES=['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
+function noteLabel(midi){const name=NOTE_NAMES[midi%12];const oct=Math.floor(midi/12)-1;return name+oct;}
+
+// 88 键钢琴:A0(21) ~ C8(108)
+const MIDI_START=21, MIDI_END=108;
+const N_KEYS=MIDI_END-MIDI_START+1; // 88
+
+/* 一个被按住的音:持有所需的振荡器与一个增益节点。
+   release() 做 note-off 的衰减;stop() 彻底销毁。 */
+function Voice(midi){
+  const freq=midiToFreq(midi);
+  const partials=[{m:1,a:1},{m:2,a:.55},{m:3,a:.34},{m:4,a:.22},{m:5,a:.14},{m:6,a:.09},{m:7,a:.06},{m:8,a:.04}];
+  const g=AC.createGain();
+  g.gain.setValueAtTime(0,AC.currentTime);
+  g.gain.linearRampToValueAtTime(0.5,AC.currentTime+0.006);
+  g.connect(master);
+  const oscs=partials.map(p=>{
+    const o=AC.createOscillator();o.type='sine';
+    o.frequency.value=freq*p.m*(1+0.0006*p.m*p.m);
+    const og=AC.createGain();og.gain.value=p.a;
+    o.connect(og);og.connect(g);
+    o.start();
+    return o;
+  });
+  this.midi=midi;
+  this.gain=g;
+  this.oscs=oscs;
+  this.alive=true;
+  this.sustained=false; // 是否处于「松开但被踏板留住」状态
+}
+// note-off:平滑衰减后销毁。sustain=true 时衰减得很慢(自然共鸣),否则快速止音。
+Voice.prototype.release=function(sustain){
+  if(!this.alive)return;
+  const t=AC.currentTime;
+  if(sustain){
+    this.sustained=true;
+    // 自然共鸣式衰减:约 4s
+    this.gain.gain.cancelScheduledValues(t);
+    this.gain.gain.setValueAtTime(this.gain.gain.value,t);
+    this.gain.gain.exponentialRampToValueAtTime(0.0008,t+4.0);
+    // 销毁交给后台清理
+    const self=this; setTimeout(()=>self.kill(),4200);
+  }else{
+    this.gain.gain.cancelScheduledValues(t);
+    this.gain.gain.setValueAtTime(this.gain.gain.value,t);
+    this.gain.gain.exponentialRampToValueAtTime(0.0008,t+0.28);
+    const self=this; setTimeout(()=>self.kill(),340);
+  }
+};
+Voice.prototype.kill=function(){
+  if(!this.alive)return;
+  this.alive=false;
+  try{this.oscs.forEach(o=>o.stop());}catch(e){}
+  try{this.gain.disconnect();}catch(e){}
+};
+
+/* =========================================================
+   状态:activeVoices 按键索引(鼠标/触控)与 midi(键盘)分开追踪,
+   以便「同一音被两种输入按下时,松开一种不会误止另一种」。
+   这里用 midi->引用计数 简化处理。
+   ========================================================= */
+const pressedRef={};          // midi -> 当前按下该音的输入源数量
+const voicesByMidi={};        // midi -> Voice(同时只保留一个实例,复音靠不同 midi)
+let sustainOn=false;
+let octave=4;                  // 电脑键盘映射的基准八度
+
+function startNote(midi){
+  if(AC.state==='suspended')AC.resume();
+  pressedRef[midi]=(pressedRef[midi]||0)+1;
+  // 若已有该音在响(被踏板留住),先销毁旧实例再开新的,避免叠音糊
+  if(voicesByMidi[midi]){voicesByMidi[midi].kill();delete voicesByMidi[midi];}
+  const v=new Voice(midi);
+  voicesByMidi[midi]=v;
+  setKeyVisual(midi,true);
+}
+function releaseNote(midi){
+  const r=pressedRef[midi]||0;
+  if(r<=0)return;
+  pressedRef[midi]=r-1;
+  if(pressedRef[midi]>0)return; // 还有其它输入源按着,不释放
+  const v=voicesByMidi[midi];
+  if(v){v.release(sustainOn);}
+  setKeyVisual(midi,false);
+}
+// 切换延音:关闭时,把所有「被踏板留住」的音统一释放
+function setSustain(on){
+  sustainOn=on;
+  document.getElementById('sustain-btn').textContent='延音踏板 · '+(on?'开':'关');
+  document.getElementById('sustain-btn').classList.toggle('sus-on',on);
+  document.getElementById('pedal-strip').classList.toggle('on',on);
+  if(!on){
+    for(const m in voicesByMidi){
+      const v=voicesByMidi[m];
+      if(v&&v.sustained){v.release(false);delete voicesByMidi[m];}
+    }
+  }
+}
+
+/* =========================================================
+   键盘 UI 构建
+   ========================================================= */
+const kb=document.getElementById('kb');
+const WHITE_W=34, BLACK_W=22;
+const keyEls={}; // midi -> el
+
+(function buildKeyboard(){
+  let whiteCount=0;
+  for(let i=0;i<N_KEYS;i++){
+    const midi=MIDI_START+i;
+    const name=NOTE_NAMES[midi%12];
+    const isBlack=name.includes('#');
+    const el=document.createElement('div');
+    el.className='key '+(isBlack?'black':'white');
+    el.dataset.midi=midi;
+    if(isBlack){
+      el.style.left=(whiteCount*WHITE_W-BLACK_W/2)+'px';
+    }else{
+      el.style.left=(whiteCount*WHITE_W)+'px';
+      const lbl=document.createElement('span');lbl.className='kb-label';lbl.textContent=noteLabel(midi);
+      el.appendChild(lbl);
+      whiteCount++;
+    }
+    // 鼠标 / 触控:pointer 事件天然支持多点触控 => 多键同按
+    el.addEventListener('pointerdown',e=>{
+      e.preventDefault();
+      try{el.setPointerCapture(e.pointerId);}catch(_){}
+      startNote(midi);
+    });
+    const upHandler=e=>{
+      // pointerup / pointerleave / pointercancel 都视为松开
+      releaseNote(midi);
+    };
+    el.addEventListener('pointerup',upHandler);
+    el.addEventListener('pointerleave',upHandler);
+    el.addEventListener('pointercancel',upHandler);
+    // 防止拖选
+    el.addEventListener('dragstart',e=>e.preventDefault());
+    kb.appendChild(el);
+    keyEls[midi]=el;
+  }
+  kb.style.width=(whiteCount*WHITE_W)+'px';
+})();
+
+function setKeyVisual(midi,on){
+  const el=keyEls[midi];if(!el)return;
+  if(on)el.classList.add('playing');else el.classList.remove('playing');
+}
+
+// 滚动到中央 C 附近
+setTimeout(()=>{ const c4=60; const el=keyEls[c4]; if(el){document.getElementById('kb-wrap').scrollLeft=(el.offsetLeft-300);} },100);
+
+/* =========================================================
+   电脑键盘映射
+   下排白键: a s d f g h j k l ;   (C..E 下一组)
+   上排黑键: w e   t y u   o p     (黑键,跳过 E-F / B-C 间隔)
+   映射到「以 octave 为基准 C」起的一组,共约 1.5 八度。
+   ========================================================= */
+const KEYMAP={
+  'a':0,'w':1,'s':2,'e':3,'d':4,'f':5,'t':6,'g':7,'y':8,'h':9,'u':10,'j':11,
+  'k':12,'o':13,'l':14,'p':15,';':16
+};
+let showLabels=false;
+function applyLabels(){
+  for(const m in keyEls){const el=keyEls[m];const lab=el.querySelector('.kb-label.map');if(lab)lab.remove();}
+  if(!showLabels)return;
+  const baseMidi=(octave+1)*12; // C{octave} => MIDI (octave+1)*12
+  for(const k in KEYMAP){
+    const midi=baseMidi+KEYMAP[k];
+    const el=keyEls[midi];if(!el)continue;
+    const lab=document.createElement('span');lab.className='kb-label map';lab.textContent=k.toUpperCase();
+    el.appendChild(lab);
+  }
+}
+function refreshOctaveLabel(){document.getElementById('oct-val').textContent='C'+octave;applyLabels();}
+
+/* =========================================================
+   UI 事件
+   ========================================================= */
+document.getElementById('sustain-btn').addEventListener('click',()=>{setSustain(!sustainOn);});
+document.getElementById('vol').addEventListener('input',e=>{
+  master.gain.value=(+e.target.value)/100*0.95;
+});
+document.getElementById('oct-down').addEventListener('click',()=>{if(octave>0){octave--;refreshOctaveLabel();}});
+document.getElementById('oct-up').addEventListener('click',()=>{if(octave<7){octave++;refreshOctaveLabel();}});
+document.getElementById('label-toggle').addEventListener('click',()=>{
+  showLabels=!showLabels;
+  document.getElementById('label-toggle').textContent=(showLabels?'隐藏按键映射':'显示按键映射');
+  applyLabels();
+});
+refreshOctaveLabel();
+
+/* 键盘弹奏:keydown 触发按下(忽略自动重复 e.repeat),keyup 释放。
+   多键同按天然支持(每键独立)。 */
+const heldKeys=new Set();
+document.addEventListener('keydown',e=>{
+  if(e.repeat)return;
+  const k=e.key.toLowerCase();
+  if(k===' '){e.preventDefault();setSustain(!sustainOn);return;}
+  if(k==='arrowleft'){if(octave>0){octave--;refreshOctaveLabel();}return;}
+  if(k==='arrowright'){if(octave<7){octave++;refreshOctaveLabel();}return;}
+  if(!(k in KEYMAP)||heldKeys.has(k))return;
+  heldKeys.add(k);
+  const baseMidi=(octave+1)*12;
+  const midi=baseMidi+KEYMAP[k];
+  if(midi>=MIDI_START&&midi<=MIDI_END)startNote(midi);
+});
+document.addEventListener('keyup',e=>{
+  const k=e.key.toLowerCase();
+  if(!(k in KEYMAP))return;
+  if(!heldKeys.has(k))return;
+  heldKeys.delete(k);
+  const baseMidi=(octave+1)*12;
+  const midi=baseMidi+KEYMAP[k];
+  if(midi>=MIDI_START&&midi<=MIDI_END)releaseNote(midi);
+});
+
+// 失焦时释放所有电脑键盘按住的音,避免卡住
+window.addEventListener('blur',()=>{
+  heldKeys.forEach(k=>{
+    const baseMidi=(octave+1)*12;
+    const midi=baseMidi+KEYMAP[k];
+    if(midi>=MIDI_START&&midi<=MIDI_END)releaseNote(midi);
+  });
+  heldKeys.clear();
+});
+
+// 首次交互解锁音频
+document.addEventListener('pointerdown',()=>{if(AC.state==='suspended')AC.resume();},{once:false});
+document.addEventListener('keydown',()=>{if(AC.state==='suspended')AC.resume();},{once:false});
+</script>
+</body>
+</html>
