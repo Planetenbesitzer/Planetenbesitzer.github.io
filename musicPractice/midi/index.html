@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GM 合成器 · MIDIplus tiny+</title>
+<style>
+  :root{
+    --bg1:#0b0a1f; --bg2:#1a1033; --bg3:#2a0f3d;
+    --panel:rgba(255,255,255,.05); --panel-bd:rgba(255,255,255,.12);
+    --ink:#f3f0ff; --muted:#b3a8d4; --dim:#8a7fb0;
+    --gold:#ffd56b; --pink:#ff8bd8; --cyan:#7af0ff; --green:#8effb0; --red:#ff7a93;
+    --accent:#b98cff;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{
+    font-family:"Segoe UI","PingFang SC","Microsoft YaHei",system-ui,sans-serif;
+    color:var(--ink);
+    background:
+      radial-gradient(1200px 700px at 15% -10%, #3a1860 0%, transparent 55%),
+      radial-gradient(1000px 800px at 110% 10%, #5a1a4a 0%, transparent 50%),
+      linear-gradient(160deg,var(--bg1),var(--bg2) 50%,var(--bg3));
+    background-attachment:fixed; min-height:100vh; overflow-x:hidden;
+  }
+  .wrap{position:relative;z-index:1;max-width:1280px;margin:0 auto;padding:24px 18px 40px}
+  header{text-align:center;margin-bottom:18px}
+  header h1{font-size:30px;font-weight:800;letter-spacing:2px;
+    background:linear-gradient(90deg,var(--gold),var(--pink),var(--cyan));
+    -webkit-background-clip:text;background-clip:text;color:transparent;}
+  header p{color:var(--muted);margin-top:6px;font-size:13px;letter-spacing:1px}
+  .status{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;align-items:center;margin-bottom:14px;font-size:13px}
+  .chip{display:flex;align-items:center;gap:8px;padding:8px 14px;border-radius:30px;border:1px solid var(--panel-bd);background:var(--panel)}
+  .dot{width:10px;height:10px;border-radius:50%;background:var(--red);box-shadow:0 0 8px var(--red);transition:all .25s}
+  .dot.ok{background:var(--green);box-shadow:0 0 10px var(--green)}
+  .dot.wait{background:var(--gold);box-shadow:0 0 8px var(--gold)}
+  .chip span{color:var(--muted)} .chip b{color:var(--ink)}
+  .badge{margin-left:4px;padding:2px 8px;border-radius:10px;background:linear-gradient(90deg,var(--gold),var(--pink));color:#1a0d2b;font-weight:800;font-size:11px}
+  .btn{padding:8px 16px;border-radius:20px;font-size:13px;font-weight:700;cursor:pointer;border:1px solid var(--panel-bd);background:rgba(255,255,255,.06);color:var(--ink);transition:all .18s}
+  .btn:hover{background:rgba(185,140,255,.2);border-color:var(--accent)}
+  .vol{width:120px;accent-color:var(--accent)}
+  .panel{background:var(--panel);border:1px solid var(--panel-bd);border-radius:18px;padding:18px;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);box-shadow:0 14px 40px rgba(0,0,0,.32);margin-bottom:14px}
+  .row-label{color:var(--dim);font-size:11px;margin-bottom:10px;letter-spacing:1.5px;text-transform:uppercase}
+
+  /* control bar */
+  .ctrl-bar{display:flex;gap:18px;align-items:stretch;flex-wrap:wrap}
+  .cb-col{flex:1 1 220px;display:flex;flex-direction:column;gap:10px;min-width:0}
+  .cb-col.tls{flex:2 1 320px}
+  .cb-label{color:var(--dim);font-size:11px;letter-spacing:1px;text-transform:uppercase}
+  .cb-transport{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+  .tp-btn{min-width:58px;padding:9px 12px}
+  .tp-btn.on{background:linear-gradient(90deg,var(--red),var(--pink));border-color:transparent;color:#1a0d2b;box-shadow:0 0 16px rgba(255,122,147,.5)}
+  .tp-btn.clear:hover{background:rgba(255,122,147,.22);border-color:var(--red)}
+  .tp-state{color:var(--muted);font-size:13px;font-variant-numeric:tabular-nums;width:100%;text-align:left;margin-top:2px}
+  .cb-tempo{display:flex;gap:14px;align-items:center;flex-wrap:wrap;font-size:12px;color:var(--muted)}
+  .cb-tempo label{display:flex;align-items:center;gap:6px}
+  .bpm-in{width:64px;padding:4px 6px;border-radius:8px;background:rgba(0,0,0,.3);color:var(--ink);border:1px solid var(--panel-bd);font-size:13px}
+  .cb-metronome{cursor:pointer}
+  .cb-metronome input{accent-color:var(--accent)}
+  .cb-save{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+  .drum-row{display:flex;gap:6px;flex-wrap:wrap}
+  .drum-row .btn{padding:6px 10px;font-size:12px}
+
+  /* tracks (main) */
+  .tracks{display:flex;flex-direction:column;gap:7px}
+  .tr{display:grid;grid-template-columns:340px 1fr;align-items:center;gap:10px;padding:8px 12px;border:1px solid var(--panel-bd);border-radius:14px;background:rgba(0,0,0,.2);transition:all .15s}
+  @media(max-width:760px){.tr{grid-template-columns:1fr}}
+  .tr-ctrl{display:flex;align-items:center;gap:8px;min-width:0}
+  .tr-ch{font-size:11px;color:var(--dim);font-weight:700;min-width:30px;flex:0 0 auto}
+  .tr-inst{font-size:13px;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;cursor:pointer;flex:1 1 auto;min-width:0}
+  .tr .btn{padding:5px 9px;font-size:12px;min-width:36px;flex:0 0 auto}
+  .tr .btn.on{background:linear-gradient(90deg,var(--red),var(--pink));color:#1a0d2b;border-color:transparent}
+  .tr-prog{flex:1 1 auto;min-width:0;max-width:200px;padding:5px 8px;border-radius:8px;background:rgba(0,0,0,.35);color:var(--ink);border:1px solid var(--panel-bd);font-size:12px;cursor:pointer}
+  .tr-prog option{background:#1a1033}
+  .tr-inst-fix{flex:1 1 auto;font-size:12px;color:var(--gold);font-weight:700;text-align:center}
+  .tr-vol{width:60px;accent-color:var(--accent);flex:0 0 auto}
+  .tr-lane{width:100%;height:52px;border-radius:8px;display:block;background:rgba(0,0,0,.3);min-width:0}
+  .tr.sel{border-color:var(--accent);background:rgba(185,140,255,.14)}
+  .tr.rec{border-color:var(--red);box-shadow:0 0 14px rgba(255,122,147,.35)}
+  .tr.play{border-color:var(--green);box-shadow:0 0 12px rgba(142,255,176,.28)}
+
+  /* keyboard + log */
+  .keyboard{position:relative;height:200px;margin:0 0 10px;overflow-x:auto;overflow-y:hidden;padding:0 6px 8px;background:rgba(0,0,0,.18);border-radius:14px;scrollbar-width:thin;scrollbar-color:var(--accent) transparent}
+  .keyboard::-webkit-scrollbar{height:8px} .keyboard::-webkit-scrollbar-thumb{background:var(--accent);border-radius:4px}
+  .kb-inner{position:relative;height:190px;margin:6px auto}
+  .key{position:absolute;top:0;height:190px;border-radius:0 0 7px 7px;cursor:default;user-select:none;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;padding-bottom:8px;gap:4px;transition:transform .04s,box-shadow .12s,background .12s}
+  .key .kb-label{font-size:10px;opacity:.55;line-height:1}
+  .key.white{background:linear-gradient(180deg,#fdfbff,#d9d3ee);width:34px;border:1px solid #b9b1d6;z-index:1;color:#555}
+  .key.black{background:linear-gradient(180deg,#2a2342,#0c0a18);width:22px;height:118px;z-index:2;color:#999}
+  .key.playing.white{background:linear-gradient(180deg,#ffe9a8,#ffd56b);box-shadow:0 0 24px rgba(255,213,107,.8)}
+  .key.playing.black{background:linear-gradient(180deg,#7c3aed,#b98cff);box-shadow:0 0 24px rgba(185,140,255,.9)}
+  @keyframes ping{0%{transform:translateY(0) scale(1)}30%{transform:translateY(3px) scale(.97)}100%{transform:translateY(0) scale(1)}}
+  .key.playing{animation:ping .18s ease-out}
+  .log-wrap{margin-top:12px}
+  .log-title{color:var(--dim);font-size:12px;margin-bottom:6px;letter-spacing:1px}
+  .log{height:120px;overflow-y:auto;background:rgba(0,0,0,.25);border:1px solid var(--panel-bd);border-radius:12px;padding:10px 12px;font-family:"Consolas",monospace;font-size:12px;line-height:1.7;scrollbar-width:thin;scrollbar-color:var(--accent) transparent}
+  .log::-webkit-scrollbar{width:6px} .log::-webkit-scrollbar-thumb{background:var(--accent);border-radius:3px}
+  .log .row{color:var(--muted)} .log .empty{color:var(--dim);font-style:italic}
+  .hint{text-align:center;color:var(--dim);font-size:12px;margin-top:10px;line-height:1.6}
+  .hint b{color:var(--cyan)}
+  footer{text-align:center;color:var(--dim);font-size:12px;margin-top:18px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>🎛️ GM 合成器</h1>
+    <p>General MIDI · 16 通道 · 通道10 打击乐</p>
+  </header>
+
+  <div class="status">
+    <div class="chip"><div class="dot" id="dot"></div><span>MIDI</span><b id="midi-state">未检测</b><span id="badge"></span></div>
+    <div class="chip"><span>设备</span><b id="dev-name">—</b></div>
+    <div class="chip"><label>音量</label><input type="range" class="vol" id="vol" min="0" max="100" value="50"></div>
+    <div class="chip"><button class="btn" id="rescan">重新连接</button></div>
+  </div>
+
+  <section class="panel ctrl-bar">
+    <div class="cb-col">
+      <div class="cb-label">走带 · 循环录音(录满自动循环 → 自动跳下轨)</div>
+      <div class="cb-transport">
+        <button class="btn tp-btn" id="tp-rec">🔴 录</button>
+        <button class="btn tp-btn" id="tp-play">▶ 播</button>
+        <button class="btn tp-btn" id="tp-stop">⏹ 停</button>
+        <button class="btn tp-btn clear" id="tp-clear">🗑 清</button>
+        <span class="tp-state" id="tp-state">⏸ 待机</span>
+      </div>
+    </div>
+    <div class="cb-col">
+      <div class="cb-label">速度 · 循环 · 文件</div>
+      <div class="cb-tempo">
+        <label>BPM <input type="number" id="bpm" min="40" max="240" value="80" class="bpm-in"></label>
+        <label>循环 <select id="loopbars" class="bpm-in"><option value="2">2小节</option><option value="4" selected>4小节</option><option value="8">8小节</option><option value="16">16小节</option></select></label>
+        <label>量化 <select id="quantize" class="bpm-in"><option value="0" selected>关</option><option value="1">1/4</option><option value="0.5">1/8</option><option value="0.25">1/16</option></select></label>
+        <label class="cb-metronome"><input type="checkbox" id="metronome" checked>节拍器</label>
+        <label>拍声 <input type="range" id="metro-vol" min="0" max="100" value="40" class="bpm-in" style="width:80px"></label>
+      </div>
+      <div class="cb-save">
+        <button class="btn" id="tp-save">💾 导出 MIDI</button>
+        <button class="btn" id="tp-load">📂 载入</button>
+        <input type="file" id="tp-file" accept=".mid,.midi,application/json" hidden>
+      </div>
+    </div>
+    <div class="cb-col">
+      <div class="cb-label">鼓 · 选中鼓轨(ch10)再录 → 录进鼓轨;否则单击试听</div>
+      <div class="drum-row">
+        <button class="btn" data-note="36">Kick</button>
+        <button class="btn" data-note="38">Snare</button>
+        <button class="btn" data-note="42">Closed Hat</button>
+        <button class="btn" data-note="46">Open Hat</button>
+        <button class="btn" data-note="41">Low Tom</button>
+        <button class="btn" data-note="45">Mid Tom</button>
+        <button class="btn" data-note="48">High Tom</button>
+        <button class="btn" data-note="49">Crash</button>
+        <button class="btn" data-note="51">Ride</button>
+        <button class="btn" data-note="39">Clap</button>
+        <button class="btn" data-note="56">Cowbell</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel">
+    <div class="row-label">8 旋律轨 + 1 鼓轨 · 每轨自选音色 · 固定长度循环 · 录满自动循环叠加(默认从鼓轨开始)</div>
+    <div class="tracks" id="tracks"></div>
+    <div class="hint">默认选中<b>鼓轨</b> → 🔴录 → 打鼓 → 自动循环 → 自动跳到 ch1 旋律轨。<b>录旋律</b>:点 ch1~ch8 轨 → 设音色 → 🔴录 → 弹键。停止=取消当前录。</div>
+  </section>
+
+  <section class="panel">
+    <div class="keyboard" id="kb-wrap"><div class="kb-inner" id="kb"></div></div>
+    <div class="log-wrap">
+      <div class="log-title">MIDI 信号(最近 50 条)</div>
+      <div class="log" id="log"><div class="empty">等待输入… 按键或点屏上琴键</div></div>
+    </div>
+  </section>
+
+  <footer>Web Audio · Web MIDI · 单文件离线</footer>
+</div>
+
+<script src="../shared/audio-core.js"></script>
+<script src="../shared/keyboard.js"></script>
+<script src="gm/programs.js"></script>
+<script src="gm/engines.js"></script>
+<script src="gm/drums.js"></script>
+<script src="gm/router.js"></script>
+<script src="gm/looper.js"></script>
+<script src="gm/trackview.js"></script>
+<script src="gm/midiwriter.js"></script>
+<script src="gm/midiimport.js"></script>
+<script>
+/* ===== UI glue — fixed-length loop station ===== */
+var selectedTrack = 0;
+
+// --- raw MIDI log ---
+var logEl = document.getElementById('log');
+var logRows = [];
+function pushLog(line){
+  if(!line) return;
+  logRows.push('<div class="row">'+line+'</div>');
+  if(logRows.length>50) logRows.shift();
+  logEl.innerHTML = logRows.join('');
+  logEl.scrollTop = logEl.scrollHeight;
+}
+Router.onLog = pushLog;
+Router.onProgramChange = function(ch, prog, name){
+  pushLog('  → ch'+(ch+1)+' now <b style="color:var(--cyan)">'+name+'</b>');
+};
+
+// --- per-track instrument selectors (built once, cloned into each melodic row) ---
+function fillProgSelect(sel){
+  GM.FAMILIES.forEach(function(fam){
+    var og=document.createElement('optgroup'); og.label=fam.name;
+    for(var i=fam.range[0]; i<=fam.range[1]; i++){
+      var o=document.createElement('option'); o.value=String(i); o.textContent=(i)+' · '+GM.PROGRAM_NAMES[i];
+      og.appendChild(o);
+    }
+    sel.appendChild(og);
+  });
+}
+
+// drum tester buttons — record into the drum track when it's armed, else one-shot preview
+document.querySelectorAll('.drum-row .btn').forEach(function(b){
+  b.addEventListener('click', function(){
+    TL.resume();
+    var note = parseInt(b.dataset.note, 10);
+    if (Looper.tracks[8].state === 'rec') { Looper.recordEvent(new Uint8Array([0x99, note, 120])); }
+    else { Drums.play(note, 120); }
+  });
+});
+
+// --- keyboard: live-play OR record into the selected track (no double-trigger) ---
+var kb = TL.makeKeyboard(document.getElementById('kb'), {
+  onNoteDown: function(midi, vel){
+    TL.resume();
+    if (Looper.isArmed()) { Looper.recordEvent(new Uint8Array([0x90, midi, vel])); }
+    else { Router.noteOn(Looper.tracks[selectedTrack].melCh, midi, vel); }
+    kb.highlight(midi, true);
+  },
+  onNoteUp: function(midi){
+    if (Looper.isArmed()) { Looper.recordEvent(new Uint8Array([0x80, midi, 0])); }
+    else { Router.noteOff(Looper.tracks[selectedTrack].melCh, midi); }
+    kb.highlight(midi, false);
+  }
+});
+Router.onNote = function(midi, on){ kb.highlight(midi, on); };
+setTimeout(function(){ kb.setScroll(60); }, 100);
+
+// --- master volume ---
+document.getElementById('vol').addEventListener('input', function(e){ TL.master.gain.value = (+e.target.value)/100*0.95; });
+
+// --- Web MIDI (status + tiny+ badge) ---
+var dotEl=document.getElementById('dot'), stateEl=document.getElementById('midi-state'), devEl=document.getElementById('dev-name'), badgeEl=document.getElementById('badge');
+function setState(kind,label,dev){
+  dotEl.className='dot'+(kind==='ok'?' ok':kind==='wait'?' wait':'');
+  stateEl.textContent=label; if(dev!==undefined) devEl.textContent=dev||'—';
+}
+function detectBadge(name){
+  if(!name) return '';
+  var n=name.toLowerCase();
+  if(n.indexOf('midiplus')!==-1 || n.indexOf('tiny')!==-1) return '✓ tiny+';
+  return '';
+}
+function attachInputs(access){
+  var inputs=[...access.inputs.values()];
+  if(inputs.length===0){ setState('bad','已授权但无设备','—'); pushLog('⚠ 已获得 MIDI 权限,但未发现任何输入设备'); return; }
+  inputs.forEach(function(inp){ inp.onmidimessage=function(e){
+    TL.resume();
+    if(!window._kbdChSeen && e.data && e.data.length>=1){
+      var st=e.data[0]&0xf0;
+      if(st>=0x80 && st<=0xe0){ window._kbdChSeen=true; var kc=e.data[0]&0x0f; pushLog('🎹 键盘发送通道: ch'+(kc+1)+(kc===9?' (鼓)':'')+' · 录制会重映射到选中轨'); }
+    }
+    var isChanVoice = e.data && e.data.length >= 2 && (e.data[0]&0xf0) >= 0x80 && (e.data[0]&0xf0) <= 0xe0;
+    if (Looper.isArmed() && isChanVoice) { Looper.recordEvent(e.data); }
+    else { Router.handleMessage(e.data); }
+  }; });
+  var names=inputs.map(function(i){ return i.name||i.manufacturer||'未知'; }).join(' / ');
+  setState('ok','已连接',names);
+  badgeEl.innerHTML = detectBadge(names) ? '<span class="badge">'+detectBadge(names)+'</span>' : '';
+  pushLog('✓ 已连接设备:<b style="color:var(--cyan)">'+names+'</b>');
+}
+async function initMIDI(){
+  if(!navigator.requestMIDIAccess){ setState('bad','浏览器不支持',''); pushLog('✗ 当前浏览器不支持 Web MIDI API,请使用 Chrome / Edge'); return; }
+  setState('wait','请求权限中…','');
+  try{
+    var access=await navigator.requestMIDIAccess({sysex:true});
+    attachInputs(access);
+    access.onstatechange=function(){ attachInputs(access); };
+  }catch(err){ setState('bad','权限被拒绝',''); pushLog('✗ MIDI 权限被拒绝:'+(err.message||err)); }
+}
+document.getElementById('rescan').addEventListener('click', initMIDI);
+
+// ===== 9-track Looper wiring =====
+Looper.onLog = pushLog;
+Looper.onTrackState = updateTrackUI;
+var tracksEl = document.getElementById('tracks');
+var trackRows = [];
+var trackCanvases = [];
+var lastArmed = false;
+(function buildTrackRows() {
+  for (var i = 0; i < 9; i++) {
+    var drum = (i === 8);
+    var chLbl = drum ? '🥁ch10' : ('ch' + (i + 1));
+    var row = document.createElement('div');
+    row.className = 'tr' + (i === 0 ? ' sel' : '');
+    row.innerHTML =
+      '<div class="tr-ctrl">' +
+      '<span class="tr-ch" id="tr-ch-' + i + '">' + chLbl + '</span>' +
+      (drum ? '<span class="tr-inst-fix" id="tr-inst-' + i + '">鼓组</span>' :
+             '<select class="tr-prog" id="tr-prog-' + i + '" title="本轨音色"></select>') +
+      '<button class="btn" id="tr-rec-' + i + '">🔴</button>' +
+      '<button class="btn" id="tr-mute-' + i + '">🔇</button>' +
+      '<input type="range" class="tr-vol" id="tr-vol-' + i + '" min="0" max="100" value="100">' +
+      '</div>' +
+      '<canvas class="tr-lane" id="tr-lane-' + i + '" width="800" height="52"></canvas>';
+    tracksEl.appendChild(row);
+    trackRows.push(row);
+    trackCanvases.push(document.getElementById('tr-lane-' + i));
+    if (!drum) {
+      var sel = document.getElementById('tr-prog-' + i);
+      fillProgSelect(sel);
+      sel.value = '0';
+      (function (idx, s) {
+        s.addEventListener('change', function () {
+          var p = parseInt(s.value, 10);
+          Looper.setTrackProgram(idx, p);
+          selectTrack(idx);
+          TL.resume();
+          var riff=[60,64,67,72];
+          riff.forEach(function(n,k){ setTimeout(function(){ Engines.play(Looper.tracks[idx].melCh, n, 100); }, k*120); setTimeout(function(){ Engines.release(Looper.tracks[idx].melCh, n); }, k*120+500); });
+        });
+      })(i, sel);
+    }
+    (function (idx) {
+      row.querySelector('.tr-ch').addEventListener('click', function () { selectTrack(idx); });
+      document.getElementById('tr-rec-' + idx).addEventListener('click', function () { armTrack(idx); });
+      document.getElementById('tr-mute-' + idx).addEventListener('click', function () {
+        var m = !Looper.tracks[idx].muted; Looper.setMute(idx, m);
+        document.getElementById('tr-mute-' + idx).classList.toggle('on', m);
+      });
+      document.getElementById('tr-vol-' + idx).addEventListener('input', function (e) {
+        Looper.setVol(idx, (+e.target.value) / 100);
+      });
+    })(i);
+  }
+})();
+
+function selectTrack(i) {
+  selectedTrack = i;
+  for (var k = 0; k < 9; k++) trackRows[k].classList.toggle('sel', k === i);
+  var t = Looper.tracks[i];
+  if (!t.isDrum) {
+    if (t.program == null) t.program = 0;            // default piano so live monitoring has a timbre
+    try { Router.setProgram(t.melCh, t.program); } catch (e) {}
+  }
+  var ps = document.getElementById('tr-prog-' + i); if (ps) ps.value = String(t.program != null ? t.program : 0);
+}
+function armTrack(idx) {
+  selectTrack(idx);
+  if (Looper.tracks[idx].state === 'rec') { Looper.cancelTake(); }
+  else { if (Looper.isArmed()) Looper.cancelTake(); Looper.recordArm(idx); }
+}
+
+var tvRAF = null;
+function drawAllLanes() {
+  var bd = Looper.barDur();
+  for (var i = 0; i < 9; i++) {
+    var cv = trackCanvases[i]; if (!cv) continue;
+    var pos = null, ll = bd;
+    try { pos = Looper.loopPos(i); ll = Looper.loopLen(i); } catch (e) {}
+    if (!ll || ll <= 0) ll = Looper.loopDur();
+    try { TrackView.drawLane(cv, Looper.tracks[i], { playing: pos !== null, pos: pos ? pos.pos : 0, loopLen: ll, barDur: bd, beatsPerBar: 4 }); } catch (e) {}
+  }
+}
+function startTVAnim() { if (tvRAF !== null) return; var tick = function () { drawAllLanes(); tvRAF = requestAnimationFrame(tick); }; tvRAF = requestAnimationFrame(tick); }
+function stopTVAnim() { if (tvRAF !== null) { cancelAnimationFrame(tvRAF); tvRAF = null; } drawAllLanes(); }
+function resizeCanvases() {
+  for (var i = 0; i < 9; i++) {
+    var cv = trackCanvases[i]; if (!cv) continue;
+    var w = cv.clientWidth; if (w) cv.width = w; cv.height = 52;
+  }
+  drawAllLanes();
+}
+window.addEventListener('resize', resizeCanvases);
+setTimeout(resizeCanvases, 60);
+
+function updateTrackUI() {
+  for (var i = 0; i < 9; i++) {
+    var t = Looper.tracks[i];
+    var row = trackRows[i];
+    row.classList.toggle('rec', t.state === 'rec');
+    row.classList.toggle('play', t.state === 'play');
+    var chLbl = document.getElementById('tr-ch-' + i);
+    if (chLbl) chLbl.textContent = t.isDrum ? '🥁ch10' : ('ch' + (t.melCh + 1));
+    if (t.isDrum) {
+      var di = document.getElementById('tr-inst-' + i); if (di) di.textContent = '鼓组';
+    } else {
+      var ps = document.getElementById('tr-prog-' + i);
+      if (ps && t.program != null) ps.value = String(t.program);
+    }
+  }
+  var rec = false, ply = false;
+  for (var j = 0; j < 9; j++) { if (Looper.tracks[j].state === 'rec') rec = true; if (Looper.tracks[j].state === 'play') ply = true; }
+  var st = document.getElementById('tp-state');
+  if (st) st.textContent = rec ? '🔴 录制中' : (ply ? '▶ 循环中' : '⏸ 待机');
+  drawAllLanes();
+  if (rec || ply) startTVAnim(); else stopTVAnim();
+  // auto-advance: a take just finished → select the next empty track for the next layer
+  var nowArmed = Looper.isArmed();
+  if (lastArmed && !nowArmed) { selectTrack(Looper.nextEmpty()); }
+  lastArmed = nowArmed;
+  saveLocal();
+}
+
+// transport buttons
+document.getElementById('tp-rec').addEventListener('click', function () { armTrack(selectedTrack); });
+document.getElementById('tp-play').addEventListener('click', function () { Looper.play(); });
+document.getElementById('tp-stop').addEventListener('click', function () { Looper.stop(); });
+document.getElementById('tp-clear').addEventListener('click', function () { if (confirm('清空所有轨道?')) Looper.clearAll(); });
+document.getElementById('bpm').addEventListener('input', function (e) { Looper.setBpm(parseInt(e.target.value, 10) || 120); drawAllLanes(); });
+document.getElementById('metronome').addEventListener('change', function (e) { Looper.setMetronomeOn(e.target.checked); });
+document.getElementById('metro-vol').addEventListener('input', function (e) { Looper.setMetroVol((+e.target.value) / 100); });
+document.getElementById('quantize').addEventListener('change', function (e) { Looper.setQuantize(parseFloat(e.target.value)); });
+// loop length — locked once any track has events (must clear to change)
+var loopbarsSel = document.getElementById('loopbars');
+loopbarsSel.addEventListener('change', function (e) {
+  var has = Looper.tracks.some(function (t) { return t.events.length > 0; });
+  if (has || Looper.isArmed()) { pushLog('⚠ 已有轨道,清空后才能改循环长度'); loopbarsSel.value = String(Looper.loopDur() / Looper.barDur()); return; }
+  Looper.setLoopBars(parseInt(e.target.value, 10));
+  pushLog('循环长度 → ' + e.target.value + ' 小节');
+});
+
+// --- save / load (JSON file + localStorage auto) ---
+var LS_KEY = 'midiplus-tracks-v2';
+function saveLocal() { try { localStorage.setItem(LS_KEY, JSON.stringify(Looper.serialize())); } catch (e) {} }
+function loadLocal() {
+  try {
+    var s = localStorage.getItem(LS_KEY); if (!s) return;
+    Looper.deserialize(JSON.parse(s));
+    var loopbarsEl = document.getElementById('loopbars');
+    var bars = Math.round(Looper.loopDur() / Looper.barDur());
+    if (loopbarsEl) loopbarsEl.value = String(bars);
+    var n = Looper.tracks.filter(function (t) { return t.events.length; }).length;
+    if (n) pushLog('📂 已从本地恢复 ' + n + ' 条轨');
+  } catch (e) {}
+}
+document.getElementById('tp-save').addEventListener('click', function () {
+  try {
+    var bpmV = parseInt(document.getElementById('bpm').value) || 120;
+    var ppq = 480;
+    var ser = Looper.serialize();
+    var trks = ser.tracks || ser;
+    var mtracks = [];
+    for (var i = 0; i < trks.length; i++) {
+      var t = trks[i]; if (!t.events.length) continue;
+      var mt = Looper.tracks[i];
+      var events = t.events.map(function (e) { return { tick: Math.round(e.dt * bpmV * ppq / 60), status: e.status, d1: e.d1, d2: e.d2, ch: e.ch }; });
+      mtracks.push({ channel: mt.melCh, program: mt.isDrum ? null : t.program, events: events });
+    }
+    if (!mtracks.length) { pushLog('⚠ 没有可导出的轨'); return; }
+    var bytes = MidiWriter.write(mtracks, bpmV, ppq);
+    var blob = new Blob([bytes], { type: 'audio/midi' });
+    var a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'midiplus.mid'; a.click();
+    setTimeout(function () { URL.revokeObjectURL(a.href); }, 1000);
+    saveLocal();
+    pushLog('💾 已导出 MIDI(' + mtracks.length + ' 轨, ' + bpmV + ' BPM)→ midiplus.mid');
+  } catch (e) { pushLog('✗ 导出失败:' + (e.message || e)); }
+});
+document.getElementById('tp-load').addEventListener('click', function () { document.getElementById('tp-file').click(); });
+document.getElementById('tp-file').addEventListener('change', function (e) {
+  var f = e.target.files && e.target.files[0]; if (!f) return;
+  var name = (f.name || '').toLowerCase();
+  var isMidi = name.endsWith('.mid') || name.endsWith('.midi');
+  var r = new FileReader();
+  r.onload = function () {
+    try {
+      var data;
+      if (isMidi) {
+        var mtracks = MidiImporter.parse(new Uint8Array(r.result));
+        if (!mtracks || !mtracks.length) { pushLog('⚠ MIDI 解析失败'); return; }
+        // 9-slot array: ch10 drums → slot 8, melodic → slots 0..7 in order
+        data = { loopBars: 4, tracks: [] };
+        for (var k = 0; k < 9; k++) data.tracks.push({ melCh: k < 8 ? k : 9, isDrum: k === 8, program: null, events: [], duration: 0, muted: false, vol: 1 });
+        var melIdx = 0;
+        mtracks.forEach(function (mt) {
+          var slot = (mt.channel === 9) ? 8 : Math.min(melIdx, 7); if (mt.channel !== 9) melIdx++;
+          var dur = mt.events.reduce(function (m, ev) { return Math.max(m, ev.dt); }, 0);
+          data.tracks[slot] = { melCh: mt.channel, isDrum: mt.channel === 9, program: mt.channel === 9 ? null : mt.program, events: mt.events, duration: dur, muted: false, vol: 1 };
+        });
+      } else {
+        data = JSON.parse(r.result);
+      }
+      var ok = Looper.deserialize(data); if (ok) {
+        var loopbarsEl = document.getElementById('loopbars');
+        var bars = Math.round(Looper.loopDur() / Looper.barDur());
+        if (loopbarsEl) loopbarsEl.value = String(bars);
+        pushLog('📂 已载入 ' + (isMidi ? 'MIDI ' : 'JSON ') + Looper.tracks.filter(function (t) { return t.events.length; }).length + ' 条轨'); saveLocal();
+      }
+      else pushLog('⚠ 文件格式不对');
+    } catch (err) { pushLog('✗ 载入失败:' + (err.message || err)); }
+  };
+  if (isMidi) r.readAsArrayBuffer(f); else r.readAsText(f);
+  e.target.value = '';
+});
+// MMC transport -> Looper. Record is START-ONLY (a footswitch that re-fires must
+// not cancel an in-progress take — auto-stop ends it, Stop cancels).
+Router.onTransport = function (label) {
+  pushLog('🚦 [Transport] <b style="color:var(--gold)">' + label + '</b>');
+  if (label === 'Record') { if (!Looper.isArmed()) Looper.recordArm(selectedTrack); }
+  else if (label === 'Play') { Looper.play(); }
+  else if (label === 'Stop') { Looper.stop(); }
+};
+
+// init: select the drum track first (drum pads → drum loop is the usual foundation), default
+// 80 BPM, track 1 (ch2) = Steel-string Guitar (prog 25), master vol 50%, restore saved tracks
+selectTrack(8);
+Looper.setBpm(parseInt(document.getElementById('bpm').value) || 80);
+Looper.setMetroVol((parseInt(document.getElementById('metro-vol').value) || 40) / 100);
+Looper.setTrackProgram(1, 25); var _p1 = document.getElementById('tr-prog-1'); if (_p1) _p1.value = '25';
+TL.master.gain.value = (parseInt(document.getElementById('vol').value) || 50) / 100 * 0.95;
+updateTrackUI();
+loadLocal();
+
+// unlock audio on first gesture
+document.addEventListener('pointerdown', function(){ TL.resume(); }, {once:false});
+document.addEventListener('keydown', function(){ TL.resume(); }, {once:false});
+
+initMIDI();
+</script>
+</body>
+</html>
