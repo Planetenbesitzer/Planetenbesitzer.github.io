@@ -1,3 +1,2 @@
 # Keep text files consistent across Windows and Linux checkouts.
 * text=auto eol=lf
-fecpheno.html filter=lfs diff=lfs merge=lfs -text
