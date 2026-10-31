@@ -1,3 +1,33 @@
-theme: jekyll-theme-cayman
-title: Welcome to Planetenbesitzer's homepage!
-description: Initialize homepage
+title: Shu-Tao Zhang
+theme: null
+description: QCD, energy correlators, spin-dependent fragmentation, and collider phenomenology.
+url: https://pkuhep.top
+lang: en
+optional_front_matter:
+  remove_originals: false
+
+# Keep local development state out of the published GitHub Pages site.
+exclude:
+  - .codex
+  - "**/.codex*"
+  - .agents
+  - "**/.agents/**"
+  - .agent
+  - "**/.agent/**"
+  - .research-companion
+  - "**/.research-companion/**"
+  - codex-cache
+  - "**/codex-cache/**"
+  - codex_cache
+  - "**/codex_cache/**"
+  - .cache
+  - "**/.cache/**"
+  - .screenshots
+  - .playwright
+  - .playwright-cli
+  - playwright-report
+  - "**/playwright-report/**"
+  - test-results
+  - "**/test-results/**"
+  - node_modules
+  - "**/node_modules/**"

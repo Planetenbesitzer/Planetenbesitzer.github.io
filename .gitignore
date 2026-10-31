@@ -1,0 +1,31 @@
+# Local Codex / agent state. Unanchored rules also cover nested projects.
+.codex/
+.codex-*/
+.codex_*/
+.agents/
+.agent/
+.research-companion/
+codex-cache/
+codex_cache/
+.codex-cache/
+.codex_cache/
+.codex*.log
+.codex*.json
+.codex*.jsonl
+
+# Keep local runs, screenshots and browser reports under these directories.
+.cache/
+.screenshots/
+.playwright/
+.playwright-cli/
+playwright-report/
+test-results/
+node_modules/
+
+# Generated Jekyll output and local machine files.
+_site/
+.jekyll-cache/
+.jekyll-metadata
+.sass-cache/
+.DS_Store
+Thumbs.db

@@ -1,0 +1,110 @@
+/* Minimal Light by Yaoyao Liu (CC0-1.0), adapted for Shu-Tao Zhang.
+   Retains the theme's profile / reading-column structure; see ../vendor/minimal-light/. */
+:root{--paper:#f9f8f4;--ink:#242b2b;--muted:#666e6b;--accent:#855038;--line:#e2e2d9;--soft:#eeeee6;--serif:Georgia,'Times New Roman','Noto Serif CJK SC',serif;--sans:-apple-system,BlinkMacSystemFont,'Segoe UI','Noto Sans',Arial,sans-serif}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:36px}
+body{margin:0;background:var(--paper);color:var(--ink);font:15px/1.75 var(--sans);-webkit-font-smoothing:antialiased}
+::selection{background:#e6d9c9;color:var(--ink)}
+a{color:inherit;text-decoration:none;text-underline-offset:4px}
+a:hover{color:var(--accent)}
+a:focus-visible{outline:2px solid var(--accent);outline-offset:5px;border-radius:2px}
+img{max-width:100%;display:block}
+svg{display:block}
+h1,h2,h3,p{margin:0}
+strong{font-weight:600}
+.skip-link{position:fixed;left:16px;top:-80px;z-index:10;padding:8px 16px;background:var(--ink);color:#fff}
+.skip-link:focus{top:12px;color:#fff}
+.wrapper{max-width:1136px;margin:0 auto;padding:76px 48px 28px;display:grid;grid-template-columns:224px minmax(0,1fr);gap:84px}
+.profile{align-self:start;position:sticky;top:58px;padding-top:5px}
+.profile-mark{display:block;width:78px;margin-bottom:24px;color:var(--accent)}
+.profile h1{font:normal 29px/1.25 var(--serif);letter-spacing:-.8px;white-space:nowrap}
+.profile-affiliation{margin-top:10px;font-size:14px}
+.profile-field{margin-top:14px;color:var(--muted);font-size:13px;line-height:1.7}
+.profile-nav{margin:33px 0 25px;border-top:1px solid var(--line);padding-top:19px;display:grid;gap:12px}
+.profile-nav a{font-size:14px;display:flex;gap:14px;align-items:center;width:fit-content}
+.profile-nav a>span:first-child{font-size:10px;color:var(--muted);font-variant-numeric:tabular-nums}
+.nav-arrow{margin-left:3px;color:var(--muted)}
+.github-link{display:inline-flex;gap:8px;align-items:center;font-size:12px;color:var(--muted)}
+.github-link svg{width:15px;height:15px}
+.profile-note{margin-top:56px;font:italic 14px/1.7 var(--serif);color:var(--muted)}
+.main-content{min-width:0}
+.eyebrow{text-transform:uppercase;letter-spacing:2.1px;font-size:10px;font-weight:600;color:var(--accent)}
+.hero-title{font:normal 52px/1.07 var(--serif);letter-spacing:-1.8px;margin:22px 0 29px}
+.hero-title span{color:var(--accent)}
+.introduction p:not(.eyebrow){color:var(--muted);font-size:14px;line-height:1.85}
+.introduction p.intro-lead{color:var(--ink);font-size:16px;line-height:1.8;margin-bottom:13px}
+.text-link{font-size:12px;font-weight:600;color:var(--accent);display:inline-flex;align-items:center;gap:15px;margin-top:21px}
+.text-link:hover{text-decoration:underline}
+.content-section{margin-top:50px;border-top:1px solid var(--line);padding-top:24px}
+.section-heading{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-bottom:23px}
+.section-heading h2{font:normal 27px/1.3 var(--serif);letter-spacing:-.5px}
+.section-aside{font-size:10px;color:var(--muted);text-align:right}
+.research-row{display:grid;grid-template-columns:24px 1fr;gap:14px;margin-top:19px}
+.research-number{font:italic 13px/1.7 var(--serif);color:var(--accent);padding-top:1px}
+.research-row h3{font-size:14px;font-weight:600;line-height:1.6;margin-bottom:3px}
+.research-row p{font-size:13px;line-height:1.8;color:var(--muted)}
+.talk{display:grid;grid-template-columns:204px minmax(0,1fr);gap:23px;align-items:start;padding:0 0 24px;margin-bottom:24px;border-bottom:1px solid var(--line)}
+.talk-preview{border:1px solid var(--line);background:var(--soft);margin-top:4px;overflow:hidden;box-shadow:0 3px 9px #242b2b07}
+.talk-preview img{width:100%;height:auto;aspect-ratio:16/9;object-fit:cover;transition:transform .2s ease}
+.talk-preview:hover img{transform:scale(1.025)}
+.talk-date{font-size:10px;color:var(--accent);line-height:1.6;margin-bottom:7px}
+.talk-date span{color:var(--muted)}
+.talk h3{font:normal 17px/1.45 var(--serif)}
+.talk h3 a:hover{text-decoration:underline}
+.talk-subtitle{font:italic 13px/1.6 var(--serif);margin-top:3px;color:var(--muted)}
+.talk-venue{font-size:10px;line-height:1.7;color:var(--muted);margin-top:8px}
+.slide-link{display:inline-flex;align-items:center;gap:16px;margin-top:12px;border:1px solid #d7d5c9;padding:3px 10px;font-size:10px;line-height:1.8}
+.slide-link:hover{background:var(--ink);border-color:var(--ink);color:var(--paper)}
+.talk:last-of-type{margin-bottom:12px;padding-bottom:0;border:0}
+.section-note{font-size:10px;color:var(--muted);margin-top:19px}
+.interests-section>p{color:var(--muted);font-size:13px}
+.interest-links{display:flex;gap:24px;flex-wrap:wrap;margin-top:16px}
+.interest-links a{font-size:12px;border-bottom:1px solid var(--line);padding-bottom:5px}
+.interest-links a span{margin-left:13px;color:var(--accent)}
+.archive-link{font-size:11px;margin-top:18px}
+.site-footer{display:flex;justify-content:space-between;gap:12px;border-top:1px solid var(--line);margin-top:52px;padding-top:18px;font-size:9px;color:var(--muted)}
+.site-footer a{text-decoration:underline}
+.footer-dot{margin:0 4px}
+/* Shared directory pages. All resources keep their original URLs. */
+.directory-shell{max-width:920px;margin:0 auto;padding:35px 40px 28px}
+.directory-header{display:flex;align-items:baseline;justify-content:space-between;gap:18px;border-bottom:1px solid var(--line);padding-bottom:20px;margin-bottom:55px}
+.brand{font:normal 23px/1.4 var(--serif);letter-spacing:-.5px}
+.breadcrumb{display:flex;gap:10px;align-items:center;font-size:11px;color:var(--muted);flex-wrap:wrap}
+.breadcrumb a:hover{text-decoration:underline}
+.page-title{font:normal 46px/1.2 var(--serif);letter-spacing:-1.1px;margin:16px 0}
+.page-intro{font-size:14px;color:var(--muted);max-width:650px}
+.folder-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px;margin:38px 0 50px}
+.folder-card{display:flex;flex-direction:column;align-items:start;min-height:230px;border:1px solid var(--line);padding:24px;background:#ffffff40;transition:border-color .15s}
+.folder-card:hover{border-color:var(--accent)}
+.folder-icon{color:var(--accent);font:italic 21px/1 var(--serif);margin-bottom:31px}
+.folder-card h2{font:normal 22px/1.3 var(--serif);margin-bottom:9px}
+.folder-card p{font-size:12px;line-height:1.8;color:var(--muted);margin-bottom:18px}
+.folder-meta{margin-top:auto;color:var(--accent);font-size:10px}
+.directory-section{margin-top:39px}
+.directory-section h2{font:normal 24px/1.4 var(--serif);margin-bottom:13px}
+.resource-list{list-style:none;padding:0;margin:0;border-top:1px solid var(--line)}
+.resource-list li{border-bottom:1px solid var(--line)}
+.resource-link{position:relative;display:flex;flex-direction:column;gap:5px;padding:19px 35px 19px 0;font-size:15px;line-height:1.65}
+.resource-link small{display:block;color:var(--muted);font-size:12px}
+.resource-arrow{position:absolute;right:6px;top:23px;color:var(--accent);font-size:15px}
+.resource-sources{font-size:12px;color:var(--muted);margin:-5px 0 16px}
+.resource-sources a{text-decoration:underline;color:var(--accent)}
+.directory-footer{display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;border-top:1px solid var(--line);margin-top:55px;padding-top:20px;font-size:11px;color:var(--muted)}
+.directory-footer a:hover{text-decoration:underline}
+.directory-page .site-footer{margin-top:55px;font-size:10px}
+.directory-page .text-link{margin-top:30px}
+.legacy-content h1{font:normal 38px/1.3 var(--serif);margin-bottom:25px}
+.legacy-content h2,.legacy-content h3{font-family:var(--serif);margin-top:26px;margin-bottom:12px}
+.legacy-content p{margin-bottom:18px}
+.legacy-content a{color:var(--accent);text-decoration:underline}
+.legacy-content pre{overflow:auto;background:var(--soft);padding:20px;font-size:12px}
+.poem{max-width:580px;margin-top:30px}
+.poem figure{margin:0 0 32px}
+.poem figure img{width:100%;height:auto}
+.poem p{margin-bottom:26px;line-height:2.2}
+@media(min-width:1300px){.wrapper{padding-top:90px}}
+@media(max-width:1000px){.wrapper{gap:46px;padding:55px 34px 28px;grid-template-columns:204px minmax(0,1fr)}.profile h1{font-size:27px}.hero-title{font-size:46px}.talk{grid-template-columns:165px minmax(0,1fr);gap:18px}}
+@media(max-width:760px){.wrapper{display:block;max-width:650px;padding:30px 27px 22px}.profile{position:static;display:grid;grid-template-columns:55px 1fr;column-gap:16px;align-items:center;padding-bottom:24px;border-bottom:1px solid var(--line);margin-bottom:38px}.profile-mark{grid-row:1/3;width:52px;margin:0}.profile h1{font-size:26px;white-space:normal}.profile-affiliation{margin:2px 0 0;font-size:12px}.profile-field,.profile-note{display:none}.profile-nav{grid-column:1/-1;display:flex;gap:23px;flex-wrap:wrap;margin:23px 0 0;padding:0;border:0}.profile-nav a{font-size:12px;gap:8px}.profile-nav a>span:first-child{font-size:9px}.github-link{grid-column:1/-1;margin-top:20px;width:fit-content;font-size:11px}.hero-title{font-size:46px;margin-top:17px;margin-bottom:22px}.introduction p.intro-lead{font-size:15px}.introduction p:not(.eyebrow){font-size:13px}.content-section{margin-top:37px;padding-top:22px}.section-heading{margin-bottom:20px}.section-heading h2{font-size:26px}.section-aside{font-size:9px}.talk{grid-template-columns:160px minmax(0,1fr);gap:18px}.talk h3{font-size:16px}.site-footer{margin-top:36px;flex-wrap:wrap;gap:5px 20px}.directory-shell{max-width:650px;padding:26px 27px}.directory-header{margin-bottom:38px;flex-direction:column;gap:10px}.page-title{font-size:39px}.folder-grid{grid-template-columns:1fr;gap:15px;margin:30px 0}.folder-card{min-height:0;padding:23px}.folder-icon{margin-bottom:16px}.folder-card h2{font-size:23px}.folder-card p{margin-bottom:16px}.directory-page .site-footer{margin-top:40px}}
+@media(max-width:440px){.hero-title{font-size:42px}.talk{grid-template-columns:1fr;gap:16px}.talk-preview{max-width:100%;margin-top:0}.talk h3{font-size:19px}.talk-date{font-size:11px}.talk-venue{font-size:11px}.section-heading{flex-wrap:wrap;gap:5px}.interest-links{gap:13px 23px}.section-note{font-size:10px}.eyebrow{letter-spacing:1.6px}.resource-link{font-size:14px}}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*::before,*::after{transition:none!important}}
+@media print{body{background:#fff}.wrapper{display:block;padding:0}.profile{position:static;margin-bottom:30px}.profile-mark,.profile-nav,.profile-note,.github-link,.skip-link{display:none}.talk{break-inside:avoid}.site-footer{margin-top:30px}}
